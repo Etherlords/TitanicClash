@@ -2,6 +2,7 @@ package net;
 
 import net.packets.AddPlayerPacket;
 import net.packets.Header;
+import net.packets.PacketTypes;
 import utils.ByteArray;
 
 import java.io.DataInputStream;
@@ -167,6 +168,13 @@ public class PlayerConnection {
 			return;
 
 		int type = inputBuffer.readInt();
+
+		if(type == PacketTypes.PING)
+		{
+			//пинг можно игнорировать но как и при любом другом пакете нужно очистить буфер от этого пакета
+			System.out.println("recive ping, ignore actions " + inputBuffer.length);
+			return;
+		}
 
 		System.out.println("recive message " + bytesNeeded+", "+type);
 	}
