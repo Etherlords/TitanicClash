@@ -6,7 +6,7 @@ import java.io.UTFDataFormatException;
 
 public class ByteArray {
 
-	private static final int SIGNED_INT_BYTE_MAX = 256;
+	public static final int SIGNED_INT_BYTE_MAX = 256;
 
 	public static final int INT_SIZE = 4;
 	public static final int LONG_SIZE = 8;
@@ -128,7 +128,7 @@ public class ByteArray {
 		return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4));
 	}
 
-	public int readInt() throws EOFException {
+	public int readInt() {
 
 		int ch1 = buffer[position];
 		int ch2 = buffer[position+1];
@@ -146,9 +146,6 @@ public class ByteArray {
 
 		if(ch4 < 0)
 			ch4 = SIGNED_INT_BYTE_MAX + ch4;
-
-		if ((ch1 | ch2 | ch3 | ch4) < 0)
-			throw new EOFException();
 
 		position += INT_SIZE;
 

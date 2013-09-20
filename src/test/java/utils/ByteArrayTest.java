@@ -32,6 +32,7 @@ public class ByteArrayTest {
 
 	@Test
 	public void testWriteInt() throws Exception {
+		byteArray.position = 0;
 		byteArray.writeInt(1);
 
 		Assert.assertEquals(byteArray.position, byteArray.length);
@@ -79,6 +80,55 @@ public class ByteArrayTest {
 			byteArray.position -= ByteArray.INT_SIZE;
 			Assert.assertEquals(i, byteArray.readInt());
 		}
+
+		byteArray.position = 0;
+
+		byteArray.writeByte((byte)-1);
+		byteArray.writeByte((byte)0);
+		byteArray.writeByte((byte)0);
+		byteArray.writeByte((byte)0);
+
+		byteArray.writeByte((byte)(ByteArray.SIGNED_INT_BYTE_MAX+-1));
+		byteArray.writeByte((byte)0);
+		byteArray.writeByte((byte)0);
+		byteArray.writeByte((byte)0);
+
+		byteArray.writeByte((byte)0);
+		byteArray.writeByte((byte)-1);
+		byteArray.writeByte((byte)0);
+		byteArray.writeByte((byte)0);
+
+		byteArray.writeByte((byte)0);
+		byteArray.writeByte((byte)(ByteArray.SIGNED_INT_BYTE_MAX+-1));
+		byteArray.writeByte((byte)0);
+		byteArray.writeByte((byte)0);
+
+		byteArray.writeByte((byte)0);
+		byteArray.writeByte((byte)0);
+		byteArray.writeByte((byte)-1);
+		byteArray.writeByte((byte)0);
+
+		byteArray.writeByte((byte)0);
+		byteArray.writeByte((byte)0);
+		byteArray.writeByte((byte)(ByteArray.SIGNED_INT_BYTE_MAX+-1));
+		byteArray.writeByte((byte)0);
+
+		byteArray.writeByte((byte)0);
+		byteArray.writeByte((byte)0);
+		byteArray.writeByte((byte)0);
+		byteArray.writeByte((byte)-1);
+
+		byteArray.writeByte((byte)0);
+		byteArray.writeByte((byte)0);
+		byteArray.writeByte((byte)0);
+		byteArray.writeByte((byte)(ByteArray.SIGNED_INT_BYTE_MAX+-1));
+
+		byteArray.position = 0;
+
+		Assert.assertEquals(byteArray.readInt(), byteArray.readInt());
+		Assert.assertEquals(byteArray.readInt(), byteArray.readInt());
+		Assert.assertEquals(byteArray.readInt(), byteArray.readInt());
+		Assert.assertEquals(byteArray.readInt(), byteArray.readInt());
 
 
 

@@ -1,5 +1,7 @@
 package net;
 
+import org.apache.log4j.Logger;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -7,6 +9,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
+
+	static Logger log = Logger.getLogger(Server.class.getName());
 
     private static ExecutorService executor = Executors.newCachedThreadPool();
 
@@ -23,7 +27,7 @@ public class Server {
 	{
 		try {
 			socket = new ServerSocket(8881);
-			System.out.println("socket managed");
+			log.trace("socket managed");
 		} catch (IOException e) {
 			e.printStackTrace();
 			return ;

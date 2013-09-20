@@ -4,6 +4,7 @@ import utils.ByteArray;
 
 public class Header implements IPacketPart{
 
+
 	public static final int SIZE = 8;
 
 	public int packetSize;
