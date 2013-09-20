@@ -22,10 +22,10 @@ public class Server {
 	private void initilize()
 	{
 		try {
-			socket = new ServerSocket(563);
+			socket = new ServerSocket(8881);
 			System.out.println("socket managed");
 		} catch (IOException e) {
-			System.out.println("Could not start server! " + e.toString());
+			e.printStackTrace();
 			return ;
 		}
 
