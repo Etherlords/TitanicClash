@@ -3,12 +3,13 @@ package utils;
 import java.io.EOFException;
 import java.io.UTFDataFormatException;
 
+
 public class ByteArray {
 
 	private static final int SIGNED_INT_BYTE_MAX = 256;
 
-	private static final int INT_SIZE = 4;
-	private static final int LONG_SIZE = 8;
+	public static final int INT_SIZE = 4;
+	public static final int LONG_SIZE = 8;
 
 	public byte[] buffer = new byte[10000];
 

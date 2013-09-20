@@ -1,4 +1,8 @@
+package main;
+
 import net.Server;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -12,14 +16,11 @@ public class InitClass {
 
     public static void main(String[] argv) throws IOException, InterruptedException
     {
-        new InitClass();
-    }
+	    ApplicationContext context = new ClassPathXmlApplicationContext("spring-config.xml");
+	    HelloService helloService = context.getBean(HelloService.class);
+	    Server gameServer = context.getBean(Server.class);
 
-    public InitClass() throws IOException, InterruptedException
-    {
-        Server gameServer = new Server();
-
-
+	    System.out.println(helloService.sayHello());
     }
 
 }
