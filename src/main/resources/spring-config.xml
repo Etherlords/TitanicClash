@@ -6,6 +6,63 @@
     <context:annotation-config />
     <context:component-scan base-package="*"/>
 
+    <!-- Net configuration -->
+    <bean class="utils.io.IntOperator" id="IntOperator"/>
+    <bean class="utils.io.DoubleOperator" id="DoubleOperator"/>
+    <bean class="utils.io.PointOperator" id="PointOperator"/>
+    <bean class="utils.io.UTFStringOperator" id="UTFStringOperator"/>
+
+    <bean id="HeaderOperator" class="utils.io.StreamOperator">
+        <property name="serializers">
+            <array value-type="utils.io.ISerializer">
+                <ref bean="IntOperator"/>
+                <ref bean="IntOperator"/>
+                <ref bean="DoubleOperator"/>
+            </array>
+        </property>
+        <property name="deserializers">
+            <array value-type="utils.io.IDeserializer">
+                <ref bean="IntOperator"/>
+                <ref bean="IntOperator"/>
+            </array>
+        </property>
+    </bean>
+
+
+    <bean id="LoginOperator" class="utils.io.StreamOperator">
+        <property name="deserializers">
+            <array value-type="utils.io.IDeserializer">
+                <!-- login -->
+                <ref bean="UTFStringOperator"/>
+                <!-- password -->
+                <ref bean="UTFStringOperator"/>
+            </array>
+        </property>
+    </bean>
+
+    <bean id="LoginAnswerOperator" class="utils.io.StreamOperator">
+        <!-- status -->
+        <property name="deserializers">
+            <array value-type="utils.io.IDeserializer">
+                <ref bean="IntOperator"/>
+            </array>
+        </property>
+    </bean>
+
+    <bean id="ChatMessageOperator" class="utils.io.StreamOperator">
+        <property name="serializers">
+            <array value-type="utils.io.ISerializer">
+                <!-- userid -->
+                <ref bean="IntOperator"/>
+                <!-- mesasge group -->
+                <ref bean="IntOperator"/>
+                <!-- message -->
+                <ref bean="UTFStringOperator"/>
+            </array>
+        </property>
+    </bean>
+    <!-- end of net config -->
+
     <bean class="game.Lobby"></bean>
 
     <bean class="net.Server"/>

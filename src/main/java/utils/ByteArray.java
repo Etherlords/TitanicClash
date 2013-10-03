@@ -1,12 +1,11 @@
 package utils;
 
-import java.io.EOFException;
 import java.io.UTFDataFormatException;
 
 
 public class ByteArray {
 
-	public static final int SIGNED_INT_BYTE_MAX = 256;
+	public static final int UNSIGNED_BYTE_MAX = 256;
 
 	public static final int INT_SIZE = 4;
 	public static final int LONG_SIZE = 8;
@@ -45,7 +44,7 @@ public class ByteArray {
 		writeByte((byte) ((v) & 0xFF));
 	}
 
-	public int utfSizeOf(String str)
+	public static final int utfSizeOf(String str)
 	{
 		int strlen = str.length();
 		int utflen = 0;
@@ -113,21 +112,6 @@ public class ByteArray {
 			length = position;
 	}
 
-	public int readUnsignedInt() throws EOFException {
-
-		int ch1 = buffer[position];
-		int ch2 = buffer[position+1];
-		int ch3 = buffer[position+2];
-		int ch4 = buffer[position+3];
-
-		if ((ch1 | ch2 | ch3 | ch4) < 0)
-			throw new EOFException();
-
-		position += INT_SIZE;
-
-		return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4));
-	}
-
 	public int readInt() {
 
 		int ch1 = buffer[position];
@@ -136,19 +120,29 @@ public class ByteArray {
 		int ch4 = buffer[position+3];
 
 		if(ch1 < 0)
-			ch1 = SIGNED_INT_BYTE_MAX + ch1;
+			ch1 = UNSIGNED_BYTE_MAX + ch1;
 
 		if(ch2 < 0)
-			ch2 = SIGNED_INT_BYTE_MAX + ch2;
+			ch2 = UNSIGNED_BYTE_MAX + ch2;
 
 		if(ch3 < 0)
-			ch3 = SIGNED_INT_BYTE_MAX + ch3;
+			ch3 = UNSIGNED_BYTE_MAX + ch3;
 
 		if(ch4 < 0)
-			ch4 = SIGNED_INT_BYTE_MAX + ch4;
+			ch4 = UNSIGNED_BYTE_MAX + ch4;
 
 		position += INT_SIZE;
 
 		return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4));
+	}
+
+	public String readUTF()
+	{
+		return "";
+	}
+
+	public double readDouble()
+	{
+		return 0;
 	}
 }

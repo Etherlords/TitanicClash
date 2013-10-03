@@ -88,7 +88,7 @@ public class ByteArrayTest {
 		byteArray.writeByte((byte)0);
 		byteArray.writeByte((byte)0);
 
-		byteArray.writeByte((byte)(ByteArray.SIGNED_INT_BYTE_MAX+-1));
+		byteArray.writeByte((byte)(ByteArray.UNSIGNED_BYTE_MAX +-1));
 		byteArray.writeByte((byte)0);
 		byteArray.writeByte((byte)0);
 		byteArray.writeByte((byte)0);
@@ -99,7 +99,7 @@ public class ByteArrayTest {
 		byteArray.writeByte((byte)0);
 
 		byteArray.writeByte((byte)0);
-		byteArray.writeByte((byte)(ByteArray.SIGNED_INT_BYTE_MAX+-1));
+		byteArray.writeByte((byte)(ByteArray.UNSIGNED_BYTE_MAX +-1));
 		byteArray.writeByte((byte)0);
 		byteArray.writeByte((byte)0);
 
@@ -110,7 +110,7 @@ public class ByteArrayTest {
 
 		byteArray.writeByte((byte)0);
 		byteArray.writeByte((byte)0);
-		byteArray.writeByte((byte)(ByteArray.SIGNED_INT_BYTE_MAX+-1));
+		byteArray.writeByte((byte)(ByteArray.UNSIGNED_BYTE_MAX +-1));
 		byteArray.writeByte((byte)0);
 
 		byteArray.writeByte((byte)0);
@@ -121,7 +121,7 @@ public class ByteArrayTest {
 		byteArray.writeByte((byte)0);
 		byteArray.writeByte((byte)0);
 		byteArray.writeByte((byte)0);
-		byteArray.writeByte((byte)(ByteArray.SIGNED_INT_BYTE_MAX+-1));
+		byteArray.writeByte((byte)(ByteArray.UNSIGNED_BYTE_MAX +-1));
 
 		byteArray.position = 0;
 

@@ -27,7 +27,7 @@ public class Server {
 	{
 		try {
 			socket = new ServerSocket(8881);
-			log.trace("socket managed");
+			log.debug("socket managed");
 		} catch (IOException e) {
 			e.printStackTrace();
 			return ;
@@ -49,7 +49,7 @@ public class Server {
 			try
 			{
 				client = socket.accept();
-				System.out.println("new client accepted: " + client.getInetAddress().toString());
+				log.debug("new client: " +  client.getInetAddress().toString());
 				handleConnection(client);
 			}
 			catch (IOException e)
