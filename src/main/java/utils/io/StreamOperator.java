@@ -3,7 +3,7 @@ package utils.io;
 import org.apache.log4j.Logger;
 import utils.ByteArray;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 public class StreamOperator implements ISerializer, IDeserializer, IStream
 {
@@ -13,14 +13,14 @@ public class StreamOperator implements ISerializer, IDeserializer, IStream
 	private int serializersCount = 0;
 	private int deserializersCount = 0;
 
-	public Vector output = new Vector();
-	public Vector input = new Vector();
+	public ArrayList output;// = new ArrayList();
+	public ArrayList input;// = new ArrayList();
 
 	private int _writeSize = 0;
 	private int _readSize = 0;
 
-	private Vector<ISerializer> serializers = new Vector<ISerializer>();
-	private Vector<IDeserializer> deserializers = new Vector<IDeserializer>();
+	private ArrayList<ISerializer> serializers = new ArrayList<ISerializer>();
+	private ArrayList<IDeserializer> deserializers = new ArrayList<IDeserializer>();
 
 	private Boolean _isStaticSize = true;
 
@@ -86,6 +86,7 @@ public class StreamOperator implements ISerializer, IDeserializer, IStream
 
 	public void addDeserializer(IDeserializer deserializer)
 	{
+		log.debug("addDeSerializer" + deserializer);
 		deserializersCount++;
 		deserializers.add(deserializer);
 
@@ -102,7 +103,7 @@ public class StreamOperator implements ISerializer, IDeserializer, IStream
 
 	public void setValue(Object value)
 	{
-		input = (Vector) value;
+		input = (ArrayList) value;
 	}
 
 	public Boolean isStaticSize()

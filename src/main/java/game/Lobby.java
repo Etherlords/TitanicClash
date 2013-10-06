@@ -1,28 +1,60 @@
 package game;
 
+import logic.SessionManager;
+import net.PlayerConnection;
 import net.Session;
+import net.packets.BytePacket;
 
-import java.util.Observable;
-import java.util.Observer;
+import java.util.ArrayList;
 
-public class Lobby implements Observer
+public class Lobby
 {
 
+	private SessionManager sessionManager;
 	private Session session;
+
+	private BytePacket chatMessage;
 
 	public Lobby()
 	{
-		initilize();
+
 	}
 
-	private void initilize()
+	public void setChatMessage(BytePacket chatMessage)
 	{
-		session = new Session();
+		this.chatMessage = chatMessage;
 	}
 
-	@Override
-	public void update(Observable o, Object arg)
+	public void setSessionManager(SessionManager sessionManager)
 	{
+		this.sessionManager = sessionManager;
+	}
 
+	private void initialize()
+	{
+		session = new Session(SessionManager.LOBBY_SESSION);
+		sessionManager.addSession(session);
+	}
+
+	public void add(PlayerConnection connection)
+	{
+		ArrayList<Object> input = new ArrayList<Object>();
+		input.add(-1);
+		input.add(0);
+		input.add("Hello");
+
+		chatMessage.input = input;
+
+		connection.send(chatMessage);
+	}
+
+	public void sendMessage(String message, int from, int group)
+	{
+		ArrayList<Object> input = new ArrayList<Object>();
+		input.add(from);
+		input.add(group);
+		input.add(message);
+
+		chatMessage.input = input;
 	}
 }

@@ -1,26 +1,31 @@
 package net;
 
+import logic.SessionManager;
+import net.events.SocketDataEventRouter;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Server {
 
 	static Logger log = Logger.getLogger(Server.class.getName());
 
-    private static ExecutorService executor = Executors.newCachedThreadPool();
+	private ServerSocket socket;
 
-	ServerSocket socket;
+	private Session mainSession;
+	private DataReader dataReader;
+	private SocketDataEventRouter dataRouter;
+	private SessionManager sessionManager;
 
-	Session mainSession;
-
-	public Server()
+	public Server(DataReader dataReader, SocketDataEventRouter dataRouter, SessionManager sessionManager)
 	{
+		this.dataReader = dataReader;
+		this.dataRouter = dataRouter;
+		this.sessionManager = sessionManager;
 		initilize();
+		log.debug("socket created");
 	}
 
 	private void initilize()
@@ -33,8 +38,9 @@ public class Server {
 			return ;
 		}
 
-		mainSession = new Session();
-		executor.execute(mainSession);
+		mainSession = new Session(SessionManager.MAIN_SESSION);
+		sessionManager.addSession(mainSession);
+
 
 		mainCycle();
 
@@ -61,8 +67,9 @@ public class Server {
 
 	public void handleConnection(Socket client) throws IOException
     {
-        PlayerConnection newPlayer = new PlayerConnection(this, client);
-        mainSession.addPlayer(newPlayer);
+        PlayerConnection newPlayer = new PlayerConnection(this, client, dataReader, dataRouter);
+
+        mainSession.add(newPlayer);
     }
 
    /* public void notifyClients(PlayerConnection playerConnection, BaseCommand command) throws IOException
@@ -78,6 +85,6 @@ public class Server {
     public void closed(PlayerConnection playerConnection)
     {
         System.out.println("Player left: " + playerConnection.id);
-        mainSession.remove(playerConnection);
+        playerConnection.reciver.remove(playerConnection);
     }
 }

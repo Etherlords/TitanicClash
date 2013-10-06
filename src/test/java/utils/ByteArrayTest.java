@@ -1,22 +1,35 @@
 package utils;
 
 import junit.framework.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-/**
- * User: Asfel
- */
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:byteArrTestConfig.xml")
 public class ByteArrayTest {
 
-	@Autowired
 	private ByteArray byteArray;
+
+	@Before
+	public void setUp()
+	{
+		byteArray = new ByteArray();
+	}
+
+	@Test
+	public void testReadUTF() throws Exception
+	{
+		String s = "eat that french tea and eat my eyes";
+   	    byteArray.writeUTF(s);
+   	    byteArray.writeUTF(s);
+		byteArray.position = 0;
+
+		Assert.assertEquals("check read utf output", s, byteArray.readUTF());
+		Assert.assertEquals("check read utf output2", s, byteArray.readUTF());
+	}
 
 
 	@Test
@@ -88,7 +101,7 @@ public class ByteArrayTest {
 		byteArray.writeByte((byte)0);
 		byteArray.writeByte((byte)0);
 
-		byteArray.writeByte((byte)(ByteArray.UNSIGNED_BYTE_MAX +-1));
+		byteArray.writeByte((byte)(ByteArray.BYTE_MAX +-1));
 		byteArray.writeByte((byte)0);
 		byteArray.writeByte((byte)0);
 		byteArray.writeByte((byte)0);
@@ -99,7 +112,7 @@ public class ByteArrayTest {
 		byteArray.writeByte((byte)0);
 
 		byteArray.writeByte((byte)0);
-		byteArray.writeByte((byte)(ByteArray.UNSIGNED_BYTE_MAX +-1));
+		byteArray.writeByte((byte)(ByteArray.BYTE_MAX +-1));
 		byteArray.writeByte((byte)0);
 		byteArray.writeByte((byte)0);
 
@@ -110,7 +123,7 @@ public class ByteArrayTest {
 
 		byteArray.writeByte((byte)0);
 		byteArray.writeByte((byte)0);
-		byteArray.writeByte((byte)(ByteArray.UNSIGNED_BYTE_MAX +-1));
+		byteArray.writeByte((byte)(ByteArray.BYTE_MAX +-1));
 		byteArray.writeByte((byte)0);
 
 		byteArray.writeByte((byte)0);
@@ -121,7 +134,7 @@ public class ByteArrayTest {
 		byteArray.writeByte((byte)0);
 		byteArray.writeByte((byte)0);
 		byteArray.writeByte((byte)0);
-		byteArray.writeByte((byte)(ByteArray.UNSIGNED_BYTE_MAX +-1));
+		byteArray.writeByte((byte)(ByteArray.BYTE_MAX +-1));
 
 		byteArray.position = 0;
 

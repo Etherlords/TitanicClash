@@ -1,24 +1,27 @@
 package net;
 
-import net.packets.AddPlayerPacket;
-import net.packets.Header;
-import net.packets.PacketTypes;
+import logic.UserIDManager;
+import net.events.SocketDataEventRouter;
+import net.packets.BytePacket;
+import org.apache.log4j.Logger;
 import utils.ByteArray;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 
 public class PlayerConnection {
 
-	private static final long TIMEOUT = 1000 * 15;
-	private static final String POLICY = "<cross-domain-policy><site-control permitted-cross-domain-policies='all'/><allow-access-from domain='*' to-ports='*' /></cross-domain-policy>\0";
+	static Logger log = Logger.getLogger(PlayerConnection.class.getName());
 
-    private Server parent;
+	private static final int HEADER_SIZE = 8;
+	private static final long TIMEOUT = 1000 * 55;
+	private static final String POLICY = "<cross-domain-policy><site-control permitted-cross-domain-policies='master-only'/><allow-access-from domain='*' to-ports='*' /></cross-domain-policy>\u0000";
+	private static final String POLICY_REQUEST = "<policy-file-request/>\u0000";
 
+	private Server parent;
     private Socket socket;
 
 	private DataOutputStream outputStream;
@@ -28,78 +31,100 @@ public class PlayerConnection {
 
 	public long lastDataTime = 0;
 
-    public String id;
+    public int id;
 
 	public IReciver reciver;
 
 	private ByteArray inputBuffer;
 
-	protected PlayerConnection(Server parent, Socket socket) throws IOException {
-        try {
-            socket.setSoTimeout(0);
-            socket.setKeepAlive(true);
-        } catch (SocketException e) {e.printStackTrace();}
+	private Boolean justConnected = true;
 
-        id = socket.getInetAddress().toString();
-        this.parent = parent;
-        this.socket = socket;
+	private SocketDataEventRouter eventRouter;
+	public DataReader dataReader;
+
+	protected PlayerConnection(Server parent, Socket socket) throws IOException
+	{
+		create(parent, socket);
+    }
+
+	public PlayerConnection(Server parent, Socket socket, DataReader dataReader, SocketDataEventRouter eventRouter) throws IOException
+	{
+		this.dataReader = dataReader;
+		this.eventRouter = eventRouter;
+		create(parent, socket);
+	}
+
+	private void create(Server parent, Socket socket) throws IOException
+	{
+		try {
+			socket.setSoTimeout(0);
+			socket.setKeepAlive(true);
+		} catch (SocketException e) {e.printStackTrace();}
+
+		id = UserIDManager.getInstance().getId();
+		//id = socket.getInetAddress().toString();
+		this.parent = parent;
+		this.socket = socket;
 
 		inputBuffer = new ByteArray();
 
-	    outputStream = new DataOutputStream(socket.getOutputStream());
-	    inputStream = new DataInputStream(socket.getInputStream());
+		outputStream = new DataOutputStream(socket.getOutputStream());
+		inputStream = new DataInputStream(socket.getInputStream());
 
-	    lastDataTime = System.currentTimeMillis();
-    }
+		lastDataTime = System.currentTimeMillis();
+	}
 
-    public void sendPolicy()  throws IOException
+	public void sendPolicy()  throws IOException
     {
-        send(POLICY);
+        //send(POLICY);
     }
 
-    public void send(String command) throws IOException {
+	private void sendString(String message)
+	{
+		try
+		{
+			outputStream.writeBytes(message);
+			outputStream.flush();
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
 
+    public void send(BytePacket packet) //throws IOException
+    {
         try
         {
-	        AddPlayerPacket pack = new AddPlayerPacket();
-
 	        ByteArray buffer = new ByteArray();
 
-	        pack.header.packetType = 1;
-	        pack.header.serverTime = System.currentTimeMillis();
-	        pack.header.packetSize = 1;
-
-	        pack.playerInfo.playerID = 1;
-	        pack.playerInfo.playerName = "Asfel";
-
-	        pack.write(buffer);
-
-
-	        buffer.position = 0;
-	        buffer.writeInt(buffer.length);
-
+	        packet.source = buffer;
+	        packet.write();
 
 	        outputStream.write(buffer.buffer, 0, buffer.length);
-	        //outputStream.writeInt(outputStream.size(););
-
 	        outputStream.flush();
 
         }catch (IOException e)
         {
             internalClose();
         }
-
     }
 
-    private void internalClose() throws IOException {
+    private void internalClose()
+    {
 
         if(removed)
             return;
 
         removed = true;
 
-        this.socket.close();
-        parent.closed(this);
+	    try
+	    {
+		    this.socket.close();
+	    } catch (IOException e)
+	    {
+		    e.printStackTrace();
+	    }
+	    parent.closed(this);
     }
 
     public void listenSocket()
@@ -117,66 +142,113 @@ public class PlayerConnection {
 
 	        if(currentBytesAvailable > 0)
             {
-	            try {
-		            readSocketData();
-	            } catch (EOFException e) {
-		            e.printStackTrace();
-	            }
+	            log.debug("recive " + currentBytesAvailable + " bytes");
+				read();
             }
         }
 	    else
         {
 	        System.out.println("client is closed");
-	        try {
-	            internalClose();
-	        } catch (IOException e)
-	        {
-	            System.out.println("client out");
-	        }
+
+            internalClose();
+            System.out.println("client out");
         }
     }
 
 	private int bytesNeeded = 0;
+	private int bufferLength = 0;
 
-	private void readSocketData() throws EOFException
+	public void read()
 	{
+
 		lastDataTime = System.currentTimeMillis();
+
+
+
 		byte[] readBuffer = inputBuffer.buffer;
-		int currentDataLength = 0;
+		int bytesAvalible = 0;
 
 		try {
-			currentDataLength = inputStream.read(readBuffer);
-			inputBuffer.length += currentDataLength;
+			bytesAvalible = inputStream.read(readBuffer);
+			inputBuffer.length += bytesAvalible;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		Boolean isPacketRecived = bytesNeeded <= currentDataLength;
-
-		if (!isPacketRecived)
+		if(bytesAvalible <= 0)
 			return;
 
-		if(inputBuffer.length < Header.SIZE)
+		if(justConnected)
+		{
+			try
+			{
+				String s = ByteArray.readUTF(inputBuffer, 0, inputBuffer.length);
+
+				log.debug("str req: " + s);
+				if(s.equals(POLICY_REQUEST))
+				{
+					sendString(POLICY);
+					inputBuffer.position = 0;
+					return;
+				}
+
+			} catch (IOException e)
+			{
+				log.debug("try to read cross domain request");
+			}
+		}
+
+
+		log.debug("read from socket: " + bytesAvalible + " bytes");
+
+		bufferLength += bytesAvalible;
+
+		processBuffer();
+	}
+
+	private void processBuffer()// throws EOFException
+	{
+		if(bufferLength < HEADER_SIZE)
+			return;
+
+		justConnected = false;
+		Boolean isPacketRecived = bytesNeeded <= bufferLength;
+
+		if (!isPacketRecived)
 			return;
 
 		inputBuffer.position = 0;
 		bytesNeeded = inputBuffer.readInt();
 
-		isPacketRecived = bytesNeeded <= currentDataLength;
+		isPacketRecived = bytesNeeded <= bufferLength;
 
 		if (!isPacketRecived)
 			return;
 
 		int type = inputBuffer.readInt();
 
-		if(type == PacketTypes.PING)
+		BytePacket reader = dataReader.getReader(type);
+
+		if(reader != null)
 		{
-			//пинг можно игнорировать но как и при любом другом пакете нужно очистить буфер от этого пакета
-			System.out.println("recive ping, ignore actions " + inputBuffer.length);
-			return;
+			reader.source = inputBuffer;
+			inputBuffer.position = 0;
+
+			reader.read();
+
+			log.debug("READ: " + reader);
+
+			eventRouter.routData(reader, this);
 		}
 
-		System.out.println("recive message " + bytesNeeded+", "+type);
+			//if(type == PacketTypes.PING)
+		//{
+			//пинг можно игнорировать но как и при любом другом пакете нужно очистить буфер от этого пакета
+		//	System.out.println("recive ping, ignore actions " + inputBuffer.length);
+		//	return;
+		//}
+
+		log.debug("recive message type: " + type + ", packet size: " + bytesNeeded);
 	}
 
 }

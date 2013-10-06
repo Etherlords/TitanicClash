@@ -2,6 +2,7 @@ package utils.io;
 
 import utils.ByteArray;
 
+import java.io.IOException;
 import java.io.UTFDataFormatException;
 
 public class UTFStringOperator implements ISerializer, IDeserializer
@@ -39,7 +40,13 @@ public class UTFStringOperator implements ISerializer, IDeserializer
 
 	public int serialize(ByteArray source)
 	{
-		_value = source.readUTF();
+		try
+		{
+			_value = source.readUTF();
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 		_size = ByteArray.utfSizeOf((String) _value) + 2;
 		return _size;
 	}

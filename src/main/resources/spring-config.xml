@@ -17,7 +17,6 @@
             <array value-type="utils.io.ISerializer">
                 <ref bean="IntOperator"/>
                 <ref bean="IntOperator"/>
-                <ref bean="DoubleOperator"/>
             </array>
         </property>
         <property name="deserializers">
@@ -30,7 +29,7 @@
 
 
     <bean id="LoginOperator" class="utils.io.StreamOperator">
-        <property name="deserializers">
+        <property name="serializers">
             <array value-type="utils.io.IDeserializer">
                 <!-- login -->
                 <ref bean="UTFStringOperator"/>
@@ -44,6 +43,9 @@
         <!-- status -->
         <property name="deserializers">
             <array value-type="utils.io.IDeserializer">
+                <!--id-->
+                <ref bean="IntOperator"/>
+                <!--status-->
                 <ref bean="IntOperator"/>
             </array>
         </property>
@@ -60,12 +62,86 @@
                 <ref bean="UTFStringOperator"/>
             </array>
         </property>
+        <property name="deserializers">
+            <array value-type="utils.io.IDeserializer">
+                <!-- userid -->
+                <ref bean="IntOperator"/>
+                <!-- mesasge group -->
+                <ref bean="IntOperator"/>
+                <!-- message -->
+                <ref bean="UTFStringOperator"/>
+            </array>
+        </property>
+    </bean>
+
+    <bean class="net.packets.BytePacket" id="PingPacket">
+        <property name="type" value="0"/>
+        <property ref="HeaderOperator" name="headerOperator"/>
+    </bean>
+
+    <bean id="LoginAnswer" class="net.packets.BytePacket">
+        <property name="type" value="2"/>
+        <property name="headerOperator" ref="HeaderOperator"/>
+        <property name="streamOperator" ref="LoginAnswerOperator"/>
+    </bean>
+
+    <bean id="LoginPacket" class="net.packets.BytePacket">
+        <property name="type" value="3"/>
+        <property name="headerOperator" ref="HeaderOperator"/>
+        <property name="streamOperator" ref="LoginOperator"/>
+    </bean>
+
+    <bean id="ChatMessage" class="net.packets.BytePacket">
+        <property name="type" value="1"/>
+        <property name="headerOperator" ref="HeaderOperator"/>
+        <property name="streamOperator" ref="ChatMessageOperator"/>
+    </bean>
+
+    <bean class="net.DataReader" id="DataReaders">
+        <property name="readers">
+            <array value-type="net.packets.BytePacket">
+                <ref bean="LoginPacket"/>
+                <ref bean="PingPacket"/>
+                <ref bean="ChatMessage"/>
+            </array>
+        </property>
+    </bean>
+
+    <bean class="game.Lobby" id="Lobby" init-method="initialize">
+        <property name="chatMessage" ref="ChatMessage"/>
+        <property name="sessionManager" ref="SessionManager"/>
+    </bean>
+
+    <bean class="net.Server" id="MainServerManager">
+        <constructor-arg name="dataReader" ref="DataReaders"/>
+        <constructor-arg name="dataRouter" ref="SocketDataRouter"/>
+        <constructor-arg name="sessionManager" ref="SessionManager"/>
     </bean>
     <!-- end of net config -->
 
-    <bean class="game.Lobby"></bean>
+    <bean class="logic.SessionManager" id="SessionManager"/>
 
-    <bean class="net.Server"/>
+    <bean class="events.ChatMessageEventHandler" id="ChatMessageEvent" depends-on="ChatMessage">
+        <property name="typeFromPacket" ref="ChatMessage"/>
+        <property name="sessionManager" ref="SessionManager"/>
+    </bean>
+
+    <bean class="events.LoginEventHandler" id="LoginEvent" depends-on="LoginPacket">
+        <property name="sessionMManager" ref="SessionManager"/>
+        <property name="typeFromPacket" ref="LoginPacket"/>
+        <property name="loginAnswerPacket" ref="LoginAnswer"/>
+        <property name="lobby" ref="Lobby"/>
+    </bean>
+
+    <bean class="net.events.SocketDataEventRouter" id="SocketDataRouter">
+        <property name="listeners">
+            <array value-type="net.events.IBytePacketDataEventListener">
+                <ref bean="LoginEvent"/>
+                <ref bean="ChatMessageEvent"/>
+            </array>
+        </property>
+    </bean>
+
 
 
 </beans>

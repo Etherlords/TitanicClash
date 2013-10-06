@@ -1,6 +1,5 @@
 package main;
 
-import net.Server;
 import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -19,9 +18,7 @@ public class InitClass {
 
     public static void main(String[] argv) throws IOException, InterruptedException
     {
-
 	    ApplicationContext context = new ClassPathXmlApplicationContext("spring-config.xml");
-	    Server gameServer = context.getBean(Server.class);
     }
 
 }
