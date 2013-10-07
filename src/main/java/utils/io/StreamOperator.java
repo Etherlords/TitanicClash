@@ -8,13 +8,13 @@ import java.util.ArrayList;
 public class StreamOperator implements ISerializer, IDeserializer, IStream
 {
 
-	static Logger log = Logger.getLogger(StreamOperator.class.getName());
+	private static Logger log = Logger.getLogger(StreamOperator.class.getName());
 
 	private int serializersCount = 0;
 	private int deserializersCount = 0;
 
-	public ArrayList output;// = new ArrayList();
-	public ArrayList input;// = new ArrayList();
+	public ArrayList<Object> output;// = new ArrayList();
+	public ArrayList<Object> input;// = new ArrayList();
 
 	private int _writeSize = 0;
 	private int _readSize = 0;
@@ -42,6 +42,7 @@ public class StreamOperator implements ISerializer, IDeserializer, IStream
 	}
 
 
+	@Override
 	public int deserialize(ByteArray source)
 	{
 		int size = 0;
@@ -57,6 +58,7 @@ public class StreamOperator implements ISerializer, IDeserializer, IStream
 		return size;
 	}
 
+	@Override
 	public int serialize(ByteArray source)
 	{
 		int size = 0;
@@ -72,6 +74,7 @@ public class StreamOperator implements ISerializer, IDeserializer, IStream
 		return size;
 	}
 
+	@Override
 	public void addSerializer(ISerializer serializer)
 	{
 		log.debug("addSerializer" + serializer);
@@ -84,6 +87,7 @@ public class StreamOperator implements ISerializer, IDeserializer, IStream
 			_readSize += serializer.getReadSize();
 	}
 
+	@Override
 	public void addDeserializer(IDeserializer deserializer)
 	{
 		log.debug("addDeSerializer" + deserializer);
@@ -96,21 +100,25 @@ public class StreamOperator implements ISerializer, IDeserializer, IStream
 			_writeSize += deserializer.getWriteSize();
 	}
 
+	@Override
 	public Object getValue()
 	{
 		return output;
 	}
 
+	@Override
 	public void setValue(Object value)
 	{
 		input = (ArrayList) value;
 	}
 
+	@Override
 	public Boolean isStaticSize()
 	{
 		return _isStaticSize;
 	}
 
+	@Override
 	public int calculateReadSize()
 	{
 		if (_isStaticSize)
@@ -134,6 +142,7 @@ public class StreamOperator implements ISerializer, IDeserializer, IStream
 		return _readSize;
 	}
 
+	@Override
 	public int calculateWriteSize()
 	{
 		if (_isStaticSize)
@@ -157,11 +166,13 @@ public class StreamOperator implements ISerializer, IDeserializer, IStream
 		return _writeSize;
 	}
 
+	@Override
 	public int getReadSize()
 	{
 		return _readSize;
 	}
 
+	@Override
 	public int getWriteSize()
 	{
 		return _writeSize;

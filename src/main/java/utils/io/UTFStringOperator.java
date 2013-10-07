@@ -26,6 +26,7 @@ public class UTFStringOperator implements ISerializer, IDeserializer
 		_value = n;
 	}
 
+	@Override
 	public int deserialize(ByteArray source)
 	{
 		try
@@ -38,6 +39,7 @@ public class UTFStringOperator implements ISerializer, IDeserializer
 		return _size;
 	}
 
+	@Override
 	public int serialize(ByteArray source)
 	{
 		try
@@ -51,11 +53,13 @@ public class UTFStringOperator implements ISerializer, IDeserializer
 		return _size;
 	}
 
+	@Override
 	public Object getValue()
 	{
 		return _value;
 	}
 
+	@Override
 	public Boolean isStaticSize()
 	{
 		return false;
@@ -66,21 +70,25 @@ public class UTFStringOperator implements ISerializer, IDeserializer
 		return "UTFOperator";//formateToString(this, 'value', 'writeSize', 'readSize');
 	}
 
+	@Override
 	public int calculateReadSize()
 	{
 		return _size;
 	}
 
+	@Override
 	public int calculateWriteSize()
 	{
-		return ByteArray.utfSizeOf((String) _value);
+		return ByteArray.utfSizeOf((String) _value) + 2;
 	}
 
+	@Override
 	public int getWriteSize()
 	{
 		return _size;
 	}
 
+	@Override
 	public int getReadSize()
 	{
 		return _size;

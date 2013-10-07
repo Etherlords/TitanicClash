@@ -6,6 +6,6 @@
     <context:annotation-config />
     <context:component-scan base-package="*"/>
 
-    <bean class="utils.ByteArray"></bean>
+    <bean class="utils.ByteArray"/>
 
 </beans>

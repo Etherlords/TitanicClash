@@ -7,7 +7,7 @@ import net.packets.BytePacket;
 
 public class BaseEventHandler implements IBytePacketDataEventListener
 {
-	protected int type;
+	private int type;
 
 	@Override
 	public void setType(int type)

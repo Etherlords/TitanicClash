@@ -10,7 +10,7 @@ import java.net.Socket;
 
 public class Server {
 
-	static Logger log = Logger.getLogger(Server.class.getName());
+	private static Logger log = Logger.getLogger(Server.class.getName());
 
 	private ServerSocket socket;
 
@@ -24,11 +24,11 @@ public class Server {
 		this.dataReader = dataReader;
 		this.dataRouter = dataRouter;
 		this.sessionManager = sessionManager;
-		initilize();
+		initialize();
 		log.debug("socket created");
 	}
 
-	private void initilize()
+	private void initialize()
 	{
 		try {
 			socket = new ServerSocket(8881);
@@ -85,6 +85,6 @@ public class Server {
     public void closed(PlayerConnection playerConnection)
     {
         System.out.println("Player left: " + playerConnection.id);
-        playerConnection.reciver.remove(playerConnection);
+        playerConnection.receiver.remove(playerConnection);
     }
 }

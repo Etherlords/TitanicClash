@@ -7,28 +7,28 @@
     <context:component-scan base-package="*"/>
 
     <!-- Net configuration -->
-    <bean class="utils.io.IntOperator" id="IntOperator"/>
-    <bean class="utils.io.DoubleOperator" id="DoubleOperator"/>
-    <bean class="utils.io.PointOperator" id="PointOperator"/>
+    <bean class="utils.io.IntOperator" id="inOperator"/>
+    <bean class="utils.io.DoubleOperator" id="doubleOperator"/>
+    <bean class="utils.io.PointOperator" id="pointOperator"/>
     <bean class="utils.io.UTFStringOperator" id="UTFStringOperator"/>
 
-    <bean id="HeaderOperator" class="utils.io.StreamOperator">
+    <bean id="headerOperator" class="utils.io.StreamOperator">
         <property name="serializers">
             <array value-type="utils.io.ISerializer">
-                <ref bean="IntOperator"/>
-                <ref bean="IntOperator"/>
+                <ref bean="inOperator"/>
+                <ref bean="inOperator"/>
             </array>
         </property>
         <property name="deserializers">
             <array value-type="utils.io.IDeserializer">
-                <ref bean="IntOperator"/>
-                <ref bean="IntOperator"/>
+                <ref bean="inOperator"/>
+                <ref bean="inOperator"/>
             </array>
         </property>
     </bean>
 
 
-    <bean id="LoginOperator" class="utils.io.StreamOperator">
+    <bean id="loginOperator" class="utils.io.StreamOperator">
         <property name="serializers">
             <array value-type="utils.io.IDeserializer">
                 <!-- login -->
@@ -39,25 +39,25 @@
         </property>
     </bean>
 
-    <bean id="LoginAnswerOperator" class="utils.io.StreamOperator">
+    <bean id="loginAnswerOperator" class="utils.io.StreamOperator">
         <!-- status -->
         <property name="deserializers">
             <array value-type="utils.io.IDeserializer">
                 <!--id-->
-                <ref bean="IntOperator"/>
+                <ref bean="inOperator"/>
                 <!--status-->
-                <ref bean="IntOperator"/>
+                <ref bean="inOperator"/>
             </array>
         </property>
     </bean>
 
-    <bean id="ChatMessageOperator" class="utils.io.StreamOperator">
+    <bean id="chatMessageOperator" class="utils.io.StreamOperator">
         <property name="serializers">
             <array value-type="utils.io.ISerializer">
                 <!-- userid -->
-                <ref bean="IntOperator"/>
-                <!-- mesasge group -->
-                <ref bean="IntOperator"/>
+                <ref bean="inOperator"/>
+                <!-- message group -->
+                <ref bean="inOperator"/>
                 <!-- message -->
                 <ref bean="UTFStringOperator"/>
             </array>
@@ -65,79 +65,79 @@
         <property name="deserializers">
             <array value-type="utils.io.IDeserializer">
                 <!-- userid -->
-                <ref bean="IntOperator"/>
-                <!-- mesasge group -->
-                <ref bean="IntOperator"/>
+                <ref bean="inOperator"/>
+                <!-- message group -->
+                <ref bean="inOperator"/>
                 <!-- message -->
                 <ref bean="UTFStringOperator"/>
             </array>
         </property>
     </bean>
 
-    <bean class="net.packets.BytePacket" id="PingPacket">
+    <bean class="net.packets.BytePacket" id="pingPacket">
         <property name="type" value="0"/>
-        <property ref="HeaderOperator" name="headerOperator"/>
+        <property ref="headerOperator" name="headerOperator"/>
     </bean>
 
-    <bean id="LoginAnswer" class="net.packets.BytePacket">
+    <bean id="loginAnswer" class="net.packets.BytePacket">
         <property name="type" value="2"/>
-        <property name="headerOperator" ref="HeaderOperator"/>
-        <property name="streamOperator" ref="LoginAnswerOperator"/>
+        <property name="headerOperator" ref="headerOperator"/>
+        <property name="streamOperator" ref="loginAnswerOperator"/>
     </bean>
 
-    <bean id="LoginPacket" class="net.packets.BytePacket">
+    <bean id="loginPacket" class="net.packets.BytePacket">
         <property name="type" value="3"/>
-        <property name="headerOperator" ref="HeaderOperator"/>
-        <property name="streamOperator" ref="LoginOperator"/>
+        <property name="headerOperator" ref="headerOperator"/>
+        <property name="streamOperator" ref="loginOperator"/>
     </bean>
 
-    <bean id="ChatMessage" class="net.packets.BytePacket">
+    <bean id="chatMessage" class="net.packets.BytePacket">
         <property name="type" value="1"/>
-        <property name="headerOperator" ref="HeaderOperator"/>
-        <property name="streamOperator" ref="ChatMessageOperator"/>
+        <property name="headerOperator" ref="headerOperator"/>
+        <property name="streamOperator" ref="chatMessageOperator"/>
     </bean>
 
-    <bean class="net.DataReader" id="DataReaders">
+    <bean class="net.DataReader" id="dataReaders">
         <property name="readers">
             <array value-type="net.packets.BytePacket">
-                <ref bean="LoginPacket"/>
-                <ref bean="PingPacket"/>
-                <ref bean="ChatMessage"/>
+                <ref bean="loginPacket"/>
+                <ref bean="pingPacket"/>
+                <ref bean="chatMessage"/>
             </array>
         </property>
     </bean>
 
-    <bean class="game.Lobby" id="Lobby" init-method="initialize">
-        <property name="chatMessage" ref="ChatMessage"/>
-        <property name="sessionManager" ref="SessionManager"/>
+    <bean class="game.Lobby" id="lobby" init-method="initialize">
+        <property name="chatMessage" ref="chatMessage"/>
+        <property name="sessionManager" ref="sessionManager"/>
     </bean>
 
-    <bean class="net.Server" id="MainServerManager">
-        <constructor-arg name="dataReader" ref="DataReaders"/>
-        <constructor-arg name="dataRouter" ref="SocketDataRouter"/>
-        <constructor-arg name="sessionManager" ref="SessionManager"/>
+    <bean class="net.Server" id="mainServerManager">
+        <constructor-arg name="dataReader" ref="dataReaders"/>
+        <constructor-arg name="dataRouter" ref="socketDataEventRouter"/>
+        <constructor-arg name="sessionManager" ref="sessionManager"/>
     </bean>
     <!-- end of net config -->
 
-    <bean class="logic.SessionManager" id="SessionManager"/>
+    <bean class="logic.SessionManager" id="sessionManager"/>
 
-    <bean class="events.ChatMessageEventHandler" id="ChatMessageEvent" depends-on="ChatMessage">
-        <property name="typeFromPacket" ref="ChatMessage"/>
-        <property name="sessionManager" ref="SessionManager"/>
+    <bean class="events.ChatMessageEventHandler" id="chatMessageEvent" depends-on="chatMessage">
+        <property name="typeFromPacket" ref="chatMessage"/>
+        <property name="sessionManager" ref="sessionManager"/>
     </bean>
 
-    <bean class="events.LoginEventHandler" id="LoginEvent" depends-on="LoginPacket">
-        <property name="sessionMManager" ref="SessionManager"/>
-        <property name="typeFromPacket" ref="LoginPacket"/>
-        <property name="loginAnswerPacket" ref="LoginAnswer"/>
-        <property name="lobby" ref="Lobby"/>
+    <bean class="events.LoginEventHandler" id="loginEvent" depends-on="loginPacket">
+        <property name="sessionMManager" ref="sessionManager"/>
+        <property name="typeFromPacket" ref="loginPacket"/>
+        <property name="loginAnswerPacket" ref="loginAnswer"/>
+        <property name="lobby" ref="lobby"/>
     </bean>
 
-    <bean class="net.events.SocketDataEventRouter" id="SocketDataRouter">
+    <bean class="net.events.SocketDataEventRouter" id="socketDataEventRouter">
         <property name="listeners">
             <array value-type="net.events.IBytePacketDataEventListener">
-                <ref bean="LoginEvent"/>
-                <ref bean="ChatMessageEvent"/>
+                <ref bean="loginEvent"/>
+                <ref bean="chatMessageEvent"/>
             </array>
         </property>
     </bean>

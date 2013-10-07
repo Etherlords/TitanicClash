@@ -1,6 +1,6 @@
 package net;
 
-public interface IReciver
+public interface IReceiver
 {
 	public void handlePacket();
 

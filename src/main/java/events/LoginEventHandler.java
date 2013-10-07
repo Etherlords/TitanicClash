@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class LoginEventHandler extends BaseEventHandler
 {
-	static Logger log = Logger.getLogger(LoginEventHandler.class.getName());
+	private static Logger log = Logger.getLogger(LoginEventHandler.class.getName());
 
 	private SessionManager sessionManager;
 	private BytePacket loginAnswerPacket;

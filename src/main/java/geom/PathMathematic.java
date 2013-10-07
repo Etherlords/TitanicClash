@@ -37,7 +37,7 @@ public class PathMathematic
         return currentPoint;
     }
 
-    public long currentTime()
+    long currentTime()
     {
         return System.currentTimeMillis();
     }

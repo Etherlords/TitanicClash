@@ -12,7 +12,8 @@ public class ByteArray {
 	public static final int INT_SIZE = 4;
 	public static final int LONG_SIZE = 8;
 
-	public byte[] buffer = new byte[100000];
+	//   1mb
+	public final byte[] buffer = new byte[1000000];
 
 	public int position = 0;
 	public int length = 0;
@@ -20,6 +21,18 @@ public class ByteArray {
 	public ByteArray()
 	{
 
+	}
+
+	public void cut(int from)
+	{
+		length = length-from;
+
+		if(position > length)
+			position = length;
+
+		byte[] cutBuffer = new byte[length];
+		System.arraycopy(buffer, from, buffer, 0, length);
+		System.arraycopy(cutBuffer, 0, buffer, length, length);
 	}
 
 	public final void writeLong(long v)
@@ -80,7 +93,7 @@ public class ByteArray {
 		return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4));
 	}
 
-	public final void writeShort(short v)
+	public final void writeShort(int v)
 	{
 		writeByte((byte) ((v >>> 8) & 0xFF));
 		writeByte((byte) ((v) & 0xFF));
@@ -89,9 +102,16 @@ public class ByteArray {
 	public final int readShort() throws IOException {
 		int ch1 = readByte();
 		int ch2 = readByte();
+
+		if(ch1 < 0)
+			ch1 = BYTE_MAX + ch1;
+
+		if(ch2 < 0)
+			ch2 = BYTE_MAX + ch2;
+
 		if ((ch1 | ch2) < 0)
 			throw new EOFException();
-		return (ch1 << 8) + (ch2 << 0);
+		return (ch1 << 8) + (ch2);
 	}
 
 	public void read(byte[] to, int offset, int length)
@@ -105,7 +125,7 @@ public class ByteArray {
 		}
 	}
 
-	public static final int utfSizeOf(String str)
+	public static int utfSizeOf(String str)
 	{
 		int strlen = str.length();
 		int utflen = 0;
@@ -136,8 +156,10 @@ public class ByteArray {
 			throw new UTFDataFormatException(
 					"encoded string too long: " + utflen + " bytes");
 
-		writeByte((byte) ((utflen >>> 8) & 0xFF));
-		writeByte((byte) ((utflen) & 0xFF));
+		//writeByte((byte) ((utflen >>> 8) & 0xFF));
+		//writeByte((byte) ((utflen) & 0xFF));
+
+		writeShort(utflen);
 
 		int i;
 		for (i=0; i<strlen; i++) {
@@ -169,13 +191,13 @@ public class ByteArray {
 		return readUTF(this);
 	}
 
-	public final static String readUTF(ByteArray in) throws IOException
+	public static String readUTF(ByteArray in) throws IOException
 	{
 		int utflen = in.readShort();
 		return readUTF(in, in.position, utflen);
 	}
 
-	public final static String readUTF(ByteArray in, int offset, int utflen) throws IOException
+	public static String readUTF(ByteArray in, int offset, int utflen) throws IOException
 	{
 		byte[] bytearr = new byte[utflen * 2];
 		char[] chararr = new char[utflen * 2];
@@ -228,7 +250,7 @@ public class ByteArray {
 								"malformed input around byte " + (count-1));
 					chararr[chararr_count++]=(char)(((c     & 0x0F) << 12) |
 							((char2 & 0x3F) << 6)  |
-							((char3 & 0x3F) << 0));
+							((char3 & 0x3F)));
 					break;
 				default:
                     /* 10xx xxxx,  1111 xxxx */

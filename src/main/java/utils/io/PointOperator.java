@@ -18,11 +18,13 @@ public class PointOperator implements ISerializer, IDeserializer
 	{
 	}
 
+	@Override
 	public void setValue(Object point)
 	{
 		this._value = point;
 	}
 
+	@Override
 	public int deserialize(ByteArray source)
 	{
 		Point p = (Point) _value;
@@ -31,6 +33,7 @@ public class PointOperator implements ISerializer, IDeserializer
 		return _size;
 	}
 
+	@Override
 	public int serialize(ByteArray source)
 	{
 		Point p = (Point) _value;
@@ -39,11 +42,13 @@ public class PointOperator implements ISerializer, IDeserializer
 		return _size;
 	}
 
+	@Override
 	public Object getValue()
 	{
 		return _value;
 	}
 
+	@Override
 	public Boolean isStaticSize()
 	{
 		return true;
@@ -54,21 +59,25 @@ public class PointOperator implements ISerializer, IDeserializer
 		return "PointOperator";//formateToString(this, 'value', 'writeSize', 'readSize');
 	}
 
+	@Override
 	public int calculateReadSize()
 	{
 		return _size;
 	}
 
+	@Override
 	public int calculateWriteSize()
 	{
 		return _size;
 	}
 
+	@Override
 	public int getWriteSize()
 	{
 		return _size;
 	}
 
+	@Override
 	public int getReadSize()
 	{
 		return _size;

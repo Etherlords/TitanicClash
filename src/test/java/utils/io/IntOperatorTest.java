@@ -27,7 +27,10 @@ public class IntOperatorTest
 	public void testSetValue() throws Exception
 	{
 		processor.setValue(4321);
-		Assert.assertEquals("check processor value", processor.getValue(), 4321);
+
+		int value = (Integer) processor.getValue();
+
+		Assert.assertEquals("check processor value", value, 4321);
 	}
 
 	@Test
@@ -48,7 +51,10 @@ public class IntOperatorTest
 		input.position = 0;
 
 		Assert.assertEquals("check buffer size", processor.serialize(input), TypesSize.INT_SIZE);
-		Assert.assertEquals("check serialization value", processor.getValue(), 1234);
+
+		int value = (Integer) processor.getValue();
+
+		Assert.assertEquals("check serialization value", value, 1234);
 	}
 
 	@Test

@@ -7,7 +7,7 @@ import java.util.HashMap;
 
 public class DataReader
 {
-	static Logger log = Logger.getLogger(DataReader.class.getName());
+	private static Logger log = Logger.getLogger(DataReader.class.getName());
 
 	private HashMap<Integer, BytePacket> readers = new HashMap<Integer, BytePacket>();
 

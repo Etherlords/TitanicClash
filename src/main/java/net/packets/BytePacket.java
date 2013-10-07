@@ -10,14 +10,14 @@ public class BytePacket
 	public ByteArray source;
 
 	public int type = 0;
-	public StreamOperator streamOperator;
-	public StreamOperator headerOperator;
+	private StreamOperator streamOperator;
+	private StreamOperator headerOperator;
 
 	public ArrayList<Object> input;
 	public ArrayList<Object> output;
 
-	public ArrayList<Object> headerInput = new ArrayList<Object>(2);
-	public ArrayList<Object> headerOutput;
+	private ArrayList<Object> headerInput = new ArrayList<Object>(2);
+	private ArrayList<Object> headerOutput;
 
 	public BytePacket()
 	{

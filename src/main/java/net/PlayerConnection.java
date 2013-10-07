@@ -14,7 +14,7 @@ import java.net.SocketException;
 
 public class PlayerConnection {
 
-	static Logger log = Logger.getLogger(PlayerConnection.class.getName());
+	private static Logger log = Logger.getLogger(PlayerConnection.class.getName());
 
 	private static final int HEADER_SIZE = 8;
 	private static final long TIMEOUT = 1000 * 55;
@@ -29,20 +29,20 @@ public class PlayerConnection {
 
     private boolean removed = false;
 
-	public long lastDataTime = 0;
+	private long lastDataTime = 0;
 
     public int id;
 
-	public IReciver reciver;
+	public IReceiver receiver;
 
 	private ByteArray inputBuffer;
 
 	private Boolean justConnected = true;
 
 	private SocketDataEventRouter eventRouter;
-	public DataReader dataReader;
+	private DataReader dataReader;
 
-	protected PlayerConnection(Server parent, Socket socket) throws IOException
+	private PlayerConnection(Server parent, Socket socket) throws IOException
 	{
 		create(parent, socket);
     }
@@ -74,8 +74,8 @@ public class PlayerConnection {
 		lastDataTime = System.currentTimeMillis();
 	}
 
-	public void sendPolicy()  throws IOException
-    {
+	public void sendPolicy()
+	{
         //send(POLICY);
     }
 
@@ -142,7 +142,7 @@ public class PlayerConnection {
 
 	        if(currentBytesAvailable > 0)
             {
-	            log.debug("recive " + currentBytesAvailable + " bytes");
+	            //log.debug("receive " + currentBytesAvailable + " bytes");
 				read();
             }
         }
@@ -158,7 +158,7 @@ public class PlayerConnection {
 	private int bytesNeeded = 0;
 	private int bufferLength = 0;
 
-	public void read()
+	void read()
 	{
 
 		lastDataTime = System.currentTimeMillis();
@@ -166,16 +166,16 @@ public class PlayerConnection {
 
 
 		byte[] readBuffer = inputBuffer.buffer;
-		int bytesAvalible = 0;
+		int bytesAvailable = 0;
 
 		try {
-			bytesAvalible = inputStream.read(readBuffer);
-			inputBuffer.length += bytesAvalible;
+			bytesAvailable = inputStream.read(readBuffer, inputBuffer.length, readBuffer.length-inputBuffer.length);
+			inputBuffer.length += bytesAvailable;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		if(bytesAvalible <= 0)
+		if(bytesAvailable <= 0)
 			return;
 
 		if(justConnected)
@@ -199,9 +199,9 @@ public class PlayerConnection {
 		}
 
 
-		log.debug("read from socket: " + bytesAvalible + " bytes");
+		log.debug("read from socket: " + bytesAvailable + " bytes");
 
-		bufferLength += bytesAvalible;
+		bufferLength += bytesAvailable;
 
 		processBuffer();
 	}
@@ -212,18 +212,25 @@ public class PlayerConnection {
 			return;
 
 		justConnected = false;
-		Boolean isPacketRecived = bytesNeeded <= bufferLength;
+		Boolean isPacketReceived = bytesNeeded <= bufferLength;
 
-		if (!isPacketRecived)
+		if (!isPacketReceived)
+		{
+			log.debug("packet is not received yet " + bufferLength+", " + bytesNeeded);
 			return;
+		}
+
 
 		inputBuffer.position = 0;
 		bytesNeeded = inputBuffer.readInt();
 
-		isPacketRecived = bytesNeeded <= bufferLength;
+		isPacketReceived = bytesNeeded <= bufferLength;
 
-		if (!isPacketRecived)
+		if (!isPacketReceived)
+		{
+			log.debug("packet is not received yet " + bufferLength+", " + bytesNeeded);
 			return;
+		}
 
 		int type = inputBuffer.readInt();
 
@@ -237,18 +244,16 @@ public class PlayerConnection {
 			reader.read();
 
 			log.debug("READ: " + reader);
+			log.debug("receive message type: " + type + ", packet size: " + bytesNeeded);
 
 			eventRouter.routData(reader, this);
+			inputBuffer.cut(bytesNeeded);
+
+			bufferLength -= bytesNeeded;
+
+			bytesNeeded = 0;
 		}
 
-			//if(type == PacketTypes.PING)
-		//{
-			//пинг можно игнорировать но как и при любом другом пакете нужно очистить буфер от этого пакета
-		//	System.out.println("recive ping, ignore actions " + inputBuffer.length);
-		//	return;
-		//}
-
-		log.debug("recive message type: " + type + ", packet size: " + bytesNeeded);
 	}
 
 }

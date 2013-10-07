@@ -40,6 +40,7 @@ public class Point {
         return new Point(x - p.x, y - p.y);
     }
 
+    @Override
     public Point clone()
     {
         return new Point(x, y);

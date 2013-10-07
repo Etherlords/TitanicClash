@@ -5,11 +5,13 @@ import net.packets.BytePacket;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Session extends Thread implements IReciver
+public class Session extends Thread implements IReceiver
 {
 	public int id;
 
 	private ConcurrentHashMap<Integer, PlayerConnection> clients = new ConcurrentHashMap<Integer, PlayerConnection>();
+
+	private Boolean isExit = false;
 
 	public Session(int id)
 	{
@@ -19,15 +21,16 @@ public class Session extends Thread implements IReciver
 	public void add(PlayerConnection client)
 	{
 		clients.put(client.id, client);
-		client.reciver = this;
+		client.receiver = this;
 	}
 
 	public void remove(int id)
 	{
-		clients.remove(id).reciver = null;
+		clients.remove(id).receiver = null;
 		//clients.remove(id);
 	}
 
+	@Override
 	public void remove(PlayerConnection playerConnection)
 	{
 		remove(playerConnection.id);
@@ -36,7 +39,7 @@ public class Session extends Thread implements IReciver
 	@Override
 	public void run() {
 
-		while (true)
+		while (!isExit)
 		{
 			for(Map.Entry<Integer, PlayerConnection> entry : clients.entrySet())
 			{
