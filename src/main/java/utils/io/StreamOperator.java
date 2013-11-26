@@ -47,12 +47,15 @@ public class StreamOperator implements ISerializer, IDeserializer, IStream
 	{
 		int size = 0;
 		IDeserializer currentDeserializer;
+
+		if(deserializersCount == 0)
+			log.error("Try to deserialize data but deserialize count is 0");
+
 		for (int i = 0; i < deserializersCount; i++)
 		{
 			currentDeserializer = deserializers.get(i);
 			currentDeserializer.setValue(input.get(i));
 			size += currentDeserializer.deserialize(source);
-			//trace(currentdeserializer);
 		}
 
 		return size;
@@ -63,12 +66,15 @@ public class StreamOperator implements ISerializer, IDeserializer, IStream
 	{
 		int size = 0;
 		ISerializer currentSerializer;
+
+		if(serializersCount == 0)
+			log.error("Try to serialize data but serialize count is 0");
+
 		for (int i = 0; i < serializersCount; i++)
 		{
 			currentSerializer = serializers.get(i);
 			size += currentSerializer.serialize(source);
 			output.add(currentSerializer.getValue());
-			//trace(currentSerializer);
 		}
 
 		return size;

@@ -21,6 +21,7 @@ public class ChatMessageEventHandler extends BaseEventHandler
 	{
 		packet.input = packet.output;
 		//from.send(packet);sessionManager
-		sessionManager.broadcast(packet);
+		//sessionManager.broadcast(packet);
+		sessionManager.getSession(SessionManager.LOBBY_SESSION).broadcast(packet, from);
 	}
 }

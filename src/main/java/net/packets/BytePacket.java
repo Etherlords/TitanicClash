@@ -1,5 +1,6 @@
 package net.packets;
 
+import org.apache.log4j.Logger;
 import utils.ByteArray;
 import utils.io.StreamOperator;
 
@@ -7,6 +8,9 @@ import java.util.ArrayList;
 
 public class BytePacket
 {
+
+	private static Logger log = Logger.getLogger(BytePacket.class.getName());
+
 	public ByteArray source;
 
 	public int type = 0;

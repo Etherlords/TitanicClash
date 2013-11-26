@@ -4,6 +4,7 @@ import logic.UserIDManager;
 import net.events.SocketDataEventRouter;
 import net.packets.BytePacket;
 import org.apache.log4j.Logger;
+import player.Player;
 import utils.ByteArray;
 
 import java.io.DataInputStream;
@@ -27,13 +28,13 @@ public class PlayerConnection {
 	private DataOutputStream outputStream;
     private DataInputStream inputStream;
 
-    private boolean removed = false;
-
 	private long lastDataTime = 0;
 
-    public int id;
+	public Player data = new Player();
 
-	public IReceiver receiver;
+    public int id = -1;
+
+	private IReceiver receiver;
 
 	private ByteArray inputBuffer;
 
@@ -42,10 +43,27 @@ public class PlayerConnection {
 	private SocketDataEventRouter eventRouter;
 	private DataReader dataReader;
 
+	public boolean markForRemove = false;
+
 	private PlayerConnection(Server parent, Socket socket) throws IOException
 	{
 		create(parent, socket);
     }
+
+	public IReceiver getReceiver()
+	{
+		return receiver;
+	}
+
+	public void setReceiver(IReceiver receiver)
+	{
+		this.receiver = receiver;
+	}
+
+	public String toString()
+	{
+		return "Player " + id;
+	}
 
 	public PlayerConnection(Server parent, Socket socket, DataReader dataReader, SocketDataEventRouter eventRouter) throws IOException
 	{
@@ -101,22 +119,18 @@ public class PlayerConnection {
 	        packet.write();
 
 	        outputStream.write(buffer.buffer, 0, buffer.length);
+	        log.debug("send message type: " + packet.type +", packet size: "+ buffer.length);
 	        outputStream.flush();
 
         }catch (IOException e)
         {
+	        log.debug("close because of IOException");
             internalClose();
         }
     }
 
     private void internalClose()
     {
-
-        if(removed)
-            return;
-
-        removed = true;
-
 	    try
 	    {
 		    this.socket.close();
@@ -148,10 +162,8 @@ public class PlayerConnection {
         }
 	    else
         {
-	        System.out.println("client is closed");
-
+	        log.debug("time out");
             internalClose();
-            System.out.println("client out");
         }
     }
 
@@ -199,7 +211,7 @@ public class PlayerConnection {
 		}
 
 
-		log.debug("read from socket: " + bytesAvailable + " bytes");
+		//log.debug("read from socket: " + bytesAvailable + " bytes");
 
 		bufferLength += bytesAvailable;
 
@@ -216,7 +228,7 @@ public class PlayerConnection {
 
 		if (!isPacketReceived)
 		{
-			log.debug("packet is not received yet " + bufferLength+", " + bytesNeeded);
+			//log.debug("packet is not received yet " + bufferLength+", " + bytesNeeded);
 			return;
 		}
 
@@ -228,7 +240,7 @@ public class PlayerConnection {
 
 		if (!isPacketReceived)
 		{
-			log.debug("packet is not received yet " + bufferLength+", " + bytesNeeded);
+			//log.debug("packet is not received yet " + bufferLength+", " + bytesNeeded);
 			return;
 		}
 
@@ -243,15 +255,11 @@ public class PlayerConnection {
 
 			reader.read();
 
-			log.debug("READ: " + reader);
-			log.debug("receive message type: " + type + ", packet size: " + bytesNeeded);
+			inputBuffer.cut(bytesNeeded);
+			bufferLength -= bytesNeeded;
+			bytesNeeded = 0;
 
 			eventRouter.routData(reader, this);
-			inputBuffer.cut(bytesNeeded);
-
-			bufferLength -= bytesNeeded;
-
-			bytesNeeded = 0;
 		}
 
 	}

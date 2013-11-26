@@ -36,8 +36,13 @@ public class LoginEventHandler extends BaseEventHandler
 	@Override
 	public void handle(BytePacket packet, PlayerConnection from)
 	{
+
+		sessionManager.transfer(from, SessionManager.MAIN_SESSION, SessionManager.LOBBY_SESSION);
+
 		String login = (String) packet.output.get(0);
 		String password = (String) packet.output.get(1);
+
+		from.data.name = login;
 
 		ArrayList<Object> input = new ArrayList<Object>();
 		input.add(from.id);
@@ -47,7 +52,7 @@ public class LoginEventHandler extends BaseEventHandler
 
 		from.send(loginAnswerPacket);
 
-		sessionManager.transfer(from, SessionManager.MAIN_SESSION, SessionManager.LOBBY_SESSION);
+
 		lobby.add(from);
 
 		log.debug("handle login " + from+", " + login+", " + password);

@@ -2,13 +2,24 @@ package net;
 
 import logic.SessionManager;
 import net.events.SocketDataEventRouter;
+import net.packets.BytePacket;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class Server {
+public class Server extends Thread
+{
+	private static ExecutorService executor = Executors.newSingleThreadExecutor();
+	final Lock lock = new ReentrantLock();
+	private Condition await = lock.newCondition();
 
 	private static Logger log = Logger.getLogger(Server.class.getName());
 
@@ -18,6 +29,7 @@ public class Server {
 	private DataReader dataReader;
 	private SocketDataEventRouter dataRouter;
 	private SessionManager sessionManager;
+	private BytePacket greetPacket;
 
 	public Server(DataReader dataReader, SocketDataEventRouter dataRouter, SessionManager sessionManager)
 	{
@@ -25,7 +37,7 @@ public class Server {
 		this.dataRouter = dataRouter;
 		this.sessionManager = sessionManager;
 		initialize();
-		log.debug("socket created");
+		log.debug("socket listen");
 	}
 
 	private void initialize()
@@ -41,15 +53,16 @@ public class Server {
 		mainSession = new Session(SessionManager.MAIN_SESSION);
 		sessionManager.addSession(mainSession);
 
-
-		mainCycle();
-
+		executor.execute(this);
 	}
 
-	private void mainCycle()
+	@Override
+	public void run()
 	{
 		while (true)
 		{
+			lock.lock();
+
 			Socket client;
 
 			try
@@ -62,6 +75,20 @@ public class Server {
 			{
 				e.printStackTrace();
 			}
+
+			try
+			{
+				await.awaitNanos(100);
+			} catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+
+			ArrayList<Object> input = new ArrayList<Object>();
+			input.add("teset test test");
+			greetPacket.input = input;
+
+			mainSession.broadcast(greetPacket, mainSession.getClients().get(0));
 		}
 	}
 
@@ -70,6 +97,10 @@ public class Server {
         PlayerConnection newPlayer = new PlayerConnection(this, client, dataReader, dataRouter);
 
         mainSession.add(newPlayer);
+	    ArrayList<Object> input = new ArrayList<Object>();
+	    input.add("tesettestest");
+	    greetPacket.input = input;
+	    newPlayer.send(greetPacket);
     }
 
    /* public void notifyClients(PlayerConnection playerConnection, BaseCommand command) throws IOException
@@ -84,7 +115,17 @@ public class Server {
 
     public void closed(PlayerConnection playerConnection)
     {
-        System.out.println("Player left: " + playerConnection.id);
-        playerConnection.receiver.remove(playerConnection);
+	    System.out.println("Player left: " + playerConnection.id);
+		playerConnection.getReceiver().remove(playerConnection);
     }
+
+	public void setGreetPacket(BytePacket greetPacket)
+	{
+		this.greetPacket = greetPacket;
+	}
+
+	public BytePacket getGreetPacket()
+	{
+		return greetPacket;
+	}
 }

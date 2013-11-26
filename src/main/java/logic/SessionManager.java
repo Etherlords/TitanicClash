@@ -43,12 +43,12 @@ public class SessionManager
 		to.add(subject);
 	}
 
-	public void broadcast(BytePacket packet)
+	public void broadcast(BytePacket packet, PlayerConnection from)
 	{
 		for(Map.Entry<Integer, Session> entry : sessionsPool.entrySet())
 		{
 			Session session = entry.getValue();
-			session.broadcast(packet);
+			session.broadcast(packet, from);
 		}
 	}
 }
